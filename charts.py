@@ -1,8 +1,11 @@
 from flask import request, Flask
+from flask_cors import CORS
+
 import configs
 from exts import db
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 # 加载配置文件
 app.config.from_object(configs)
 # db绑定app
