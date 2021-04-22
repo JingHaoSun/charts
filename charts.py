@@ -1,8 +1,11 @@
 from flask import request, Flask
+from flask_cors import CORS
+
 import configs
 from exts import db
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 # 加载配置文件
 app.config.from_object(configs)
 # db绑定app
@@ -51,6 +54,19 @@ def data():
     data['xLabelList'] = xLabelList
     data['dataTable'] = dataTable
     return data
+
+@app.route('/login',methods=['POST'])
+def login():
+    return {"code":200,"data":{"token":"admin-token"}}
+
+
+@app.route('/logout',methods=['POST'])
+def logout():
+    return {"code":200,"data":"success"}
+
+@app.route('/info',methods=['GET'])
+def info():
+    return {"code":200,"data": {"roles":["admin"],"introduction":"I am a super administrator","avatar":"https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif","name":"Super Admin"}}
 
 
 if __name__ == '__main__':
