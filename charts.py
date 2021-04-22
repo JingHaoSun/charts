@@ -12,29 +12,25 @@ app.config['JSON_AS_ASCII'] = False
 
 @app.route('/data', methods=['POST'])
 def data():
+    #sql
     tablename = request.form['tablename']
-    count = request.form['count']
-    if count == None:
-        count = 5
-    #
     sql = 'select * from ' + tablename
     result = db.session.execute(sql)
     result = result.cursor.fetchall()
     sql2 = 'select * from ' + tablename + '_contrast'
     result2 = db.session.execute(sql2)
     result2 = result2.cursor.fetchall()
-    #
+
+    #data
     data = {}
     xLabelList = []
     dataTable = []
-    #
     for re2 in result2:
         a = {}
         a['cname'] = re2[1]
         a['ename'] = re2[2]
         a['pointer'] = 'xLabel' +str(re2[0])
         xLabelList.append(a)
-    #
     for re in result:
         b = {}
         b['c_yAxis'] = re[0]
@@ -42,6 +38,16 @@ def data():
         for i in range(len(result2)):
             b['xLabel' + str(i)] = re[i + 2]
         dataTable.append(b)
+
+
+    #count
+    count = request.form['count']
+    if count == None:
+        count = 5
+    dataTable = dataTable[:int(count)]
+
+
+
     data['xLabelList'] = xLabelList
     data['dataTable'] = dataTable
     return data
