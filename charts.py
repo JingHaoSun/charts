@@ -49,11 +49,10 @@ def data():
         count = 5
     dataTable = dataTable[:int(count)]
 
-
-
     data['xLabelList'] = xLabelList
     data['dataTable'] = dataTable
-    return data
+
+    return {"code":200,"data":data}
 
 @app.route('/login',methods=['POST'])
 def login():
