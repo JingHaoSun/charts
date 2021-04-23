@@ -1,8 +1,10 @@
 from flask import request, Flask
 from flask_cors import CORS
-
+import json
 import configs
 from exts import db
+import numpy as np
+import pandas as pd
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -49,8 +51,33 @@ def data():
         count = 5
     dataTable = dataTable[:int(count)]
 
+    #Data filtering
+    type = request.form['type']
+    search_list = request.form['search_list']
+
+    items = json.loads(search_list).items()
+    dtpd = pd.DataFrame(dataTable)
+    if type == 'column_a':
+        for key, value in items:
+            for elist in xLabelList:
+                if elist.get('ename') == key:
+                    pointer = elist.get('pointer')
+                    break
+
+            print(dtpd)
+            for v in value:
+                if 'gt' in v:
+                    dtpd = dtpd.loc[(dtpd[pointer] > int(v['gt'])),:]
+                elif 'lt' in v:
+                    dtpd = dtpd.loc[(dtpd[pointer] < int(v['lt'])),:]
+                elif 'le' in v:
+                    dtpd = dtpd.loc[(dtpd[pointer] <= int(v['le'])),:]
+                elif 'ge' in v:
+                    dtpd = dtpd.loc[(dtpd[pointer] >= int(v['ge'])),:]
+
+
     data['xLabelList'] = xLabelList
-    data['dataTable'] = dataTable
+    data['dataTable'] = dtpd.values.tolist()
 
     return {"code":200,"data":data}
 
@@ -69,7 +96,7 @@ def info():
 
 
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0', port=8888)
+    app.run(debug=True, host='0.0.0.0', port=8888)
 
 
 
