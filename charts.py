@@ -88,7 +88,6 @@ def datamethod():
     xLabelList,dataTable = datasql(tablename, hlzh,type)
 
     # Data filtering
-    search_list = request.form['search_list']
     dtpd = pd.DataFrame(dataTable)
     dtpdtemp = dtpd.loc[:,['c_yAxis','e_yAxis']]
     dtpd = dtpd.set_index('e_yAxis')
