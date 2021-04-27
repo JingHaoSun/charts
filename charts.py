@@ -82,11 +82,9 @@ def datamethod():
             type = datarequest[key]
     #sql
     data = {}
-    tablename = request.form['tablename']
     if tablename is None:
         return {"code": 404, "data": "error"}
     #hlzh
-    hlzh = request.form['hlzh']
     xLabelList,dataTable = datasql(tablename, hlzh,type)
 
     # Data filtering
@@ -131,10 +129,11 @@ def datamethod():
     dtpd = dtpdtemp.join(dtpd)
     dtpd = dtpd.dropna(axis=0, how='any')
     #count
-    if type == 'row':
+    if (type == 'row') & (hlzh == '0') | (type == 'column') & (hlzh == '1'):
         dtpd = dtpd.iloc[:, 0:int(count) + 2]
-    if type == 'column':
+    if (type == 'row') & (hlzh == '1') | (type == 'column') & (hlzh == '0'):
         dtpd = dtpd.iloc[:int(count)]
+        # dtpd = dtpd.iloc[:, 0:int(count) + 2]
     data['xLabelList'] = xLabelList
     data['dataTable'] = dtpd.to_dict(orient='records')
     return {"code": 200, "data": data}
