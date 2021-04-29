@@ -96,34 +96,34 @@ def datamethod():
 
     #按行筛选
     if search_list != '':
-        items = json.loads(search_list).items()
-        if type == 'row':
-            for key, value in items:
-                for elist in xLabelList:
-                    if elist.get('ename') == key:
-                        pointer = elist.get('pointer')
-                        break
-                for v in value:
-                    if 'gt' in v:
-                        dtpd = dtpd.loc[(dtpd[pointer] > int(v['gt'])), :]
-                    elif 'lt' in v:
-                        dtpd = dtpd.loc[(dtpd[pointer] < int(v['lt'])), :]
-                    elif 'le' in v:
-                        dtpd = dtpd.loc[(dtpd[pointer] <= int(v['le'])), :]
-                    elif 'ge' in v:
-                        dtpd = dtpd.loc[(dtpd[pointer] >= int(v['ge'])), :]
-        elif type == 'column':
-            for key, value in items:
-                print(key,value)
-                for v in value:
-                    if 'gt' in v:
-                        dtpd = dtpd.loc[ : ,(dtpd.xs(key,axis = 0) > int(v['gt']))]
-                    elif 'lt' in v:
-                        dtpd = dtpd.loc[: ,(dtpd.xs(key,axis = 0)<int(v['lt']))]
-                    elif 'le' in v:
-                        dtpd = dtpd.loc[: ,(dtpd.xs(key,axis = 0)<=int(v['le']))]
-                    elif 'ge' in v:
-                        dtpd = dtpd.loc[: ,(dtpd.xs(key,axis = 0)>=int(v['ge']))]
+        items = json.loads(search_list)
+        for item in items:
+            for key in item:
+                if type == 'row':
+                    for elist in xLabelList:
+                        if elist.get('ename') == key:
+                            pointer = elist.get('pointer')
+                            break
+                    for v in item[key]:
+                        if 'gt' in v:
+                            dtpd = dtpd.loc[(dtpd[pointer] > int(v['gt'])), :]
+                        elif 'lt' in v:
+                            dtpd = dtpd.loc[(dtpd[pointer] < int(v['lt'])), :]
+                        elif 'le' in v:
+                            dtpd = dtpd.loc[(dtpd[pointer] <= int(v['le'])), :]
+                        elif 'ge' in v:
+                            dtpd = dtpd.loc[(dtpd[pointer] >= int(v['ge'])), :]
+                elif type == 'column':
+                        for v in item[key]:
+                            if 'gt' in v:
+                                dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) > int(v['gt']))]
+                            elif 'lt' in v:
+                                dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) < int(v['lt']))]
+                            elif 'le' in v:
+                                dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) <= int(v['le']))]
+                            elif 'ge' in v:
+                                dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) >= int(v['ge']))]
+
 
     dtpd = dtpdtemp.join(dtpd)
     dtpd = dtpd.dropna(axis=0, how='any')
