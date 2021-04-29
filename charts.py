@@ -132,7 +132,7 @@ def datamethod():
         dtpd = dtpd.iloc[:, 0:int(count) + 2]
     if (type == 'row') & (hlzh == '1') | (type == 'column') & (hlzh == '0'):
         dtpd = dtpd.iloc[:int(count)]
-        # dtpd = dtpd.iloc[:, 0:int(count) + 2]
+    xLabelList = xLabelList[0:int(count)]
     data['xLabelList'] = xLabelList
     data['dataTable'] = dtpd.to_dict(orient='records')
     return {"code": 200, "data": data}
