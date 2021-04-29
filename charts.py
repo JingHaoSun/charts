@@ -70,6 +70,8 @@ def datamethod():
     hlzh = 1
     type = ''
     func = ''
+    formula = ''
+    newField = ''
     for key in datarequest:
         if key == 'tablename':
             tablename = datarequest[key]
@@ -83,6 +85,10 @@ def datamethod():
             type = datarequest[key]
         if key == 'func':
             func = datarequest[key]
+        if key == 'formula':
+            formula = datarequest[key]
+        if key == 'newField':
+            newField = datarequest[key]
 
     #sql
     data = {}
@@ -138,17 +144,26 @@ def datamethod():
     # func
     if func != '':
         if func == 'sum':
-            dtpd.loc['sum'] = dtpd.apply(lambda x: x.sum())
-            dtpdtemp.loc['sum'] = ''
+            dtpd.loc['求和'] = dtpd.apply(lambda x: x.sum())
+            dtpdtemp.loc['求和'] = ['求和','sum']
         elif func == 'avg':
-            dtpd.loc['avg'] = dtpd.apply(lambda x: x.mean())
-            dtpdtemp.loc['avg'] = ''
+            dtpd.loc['求平均'] = dtpd.apply(lambda x: x.mean())
+            dtpdtemp.loc['求平均'] = ['求平均','avg']
         elif func == 'max':
-            dtpd.loc['max'] = dtpd.max()
-            dtpdtemp.loc['max'] = ''
+            dtpd.loc['最大值'] = dtpd.max()
+            dtpdtemp.loc['最大值'] = ['最大值','max']
         elif func == 'min':
-            dtpd.loc['min'] = dtpd.min()
-            dtpdtemp.loc['min'] = ''
+            dtpd.loc['最小值'] = dtpd.min()
+            dtpdtemp.loc['最小值'] = ['最小值','min']
+
+    # if (formula != '') & (newField != ''):
+    #     formula = formula.split(',')
+    #     if (type == 'row') & (hlzh == '0'):
+    #         for index in range(len(formula)):
+    #             if formula[index] == '+':
+    #                 a = dtpd[formula[index - 1]]
+    #                 dtpd.loc[newField] = dtpd[formula[index-1]] + dtpd[formula[index+1]]
+    #                 dtpdtemp.loc[newField] = ''
 
     dtpd = dtpdtemp.join(dtpd)
     dtpd = dtpd.dropna(axis=0, how='any')
