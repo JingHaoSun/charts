@@ -137,9 +137,10 @@ def datamethod():
     #count
     if (type == 'row') & (hlzh == '0') | (type == 'column') & (hlzh == '1'):
         dtpd = dtpd.iloc[:, 0:int(count)]
+        xLabelList = xLabelList[0:int(count)]
     if (type == 'row') & (hlzh == '1') | (type == 'column') & (hlzh == '0'):
         dtpd = dtpd.iloc[:int(count)]
-    xLabelList = xLabelList[0:int(count)]
+        xLabelList = xLabelList[0:int(count)]
 
     # func
     if func != '':
