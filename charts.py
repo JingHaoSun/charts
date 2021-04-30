@@ -135,12 +135,12 @@ def datamethod():
                                 dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) >= int(v['ge']))]
 
     #count
-    if (type == 'row') & (hlzh == '0') | (type == 'column') & (hlzh == '1'):
+    if hlzh == '0':
         dtpd = dtpd.iloc[:, 0:int(count)]
         xLabelList = xLabelList[0:int(count)]
-    if (type == 'row') & (hlzh == '1') | (type == 'column') & (hlzh == '0'):
+    if hlzh == '1':
         dtpd = dtpd.iloc[:int(count)]
-        xLabelList = xLabelList[0:int(count)]
+
 
     # func
     if func != '':
@@ -157,14 +157,14 @@ def datamethod():
             dtpd.loc['最小值'] = dtpd.min()
             dtpdtemp.loc['最小值'] = ['最小值','min']
 
-    # if (formula != '') & (newField != ''):
-    #     formula = formula.split(',')
-    #     if (type == 'row') & (hlzh == '0'):
-    #         for index in range(len(formula)):
-    #             if formula[index] == '+':
-    #                 a = dtpd[formula[index - 1]]
-    #                 dtpd.loc[newField] = dtpd[formula[index-1]] + dtpd[formula[index+1]]
-    #                 dtpdtemp.loc[newField] = ''
+    if (formula != '') & (newField != ''):
+        formula = formula.split(',')
+        if (type == 'row') & (hlzh == '0'):
+            for index in range(len(formula)):
+                if formula[index] == '+':
+                    a = dtpd[formula[index - 1]]
+                    dtpd.loc[newField] = dtpd[formula[index-1]] + dtpd[formula[index+1]]
+                    dtpdtemp.loc[newField] = ''
 
     dtpd = dtpdtemp.join(dtpd)
     dtpd = dtpd.dropna(axis=0, how='any')
