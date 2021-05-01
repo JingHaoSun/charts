@@ -170,14 +170,35 @@ def datamethod():
         formulab = pd.Series(formulab)
         while (i < len(formulab)):
             if (formulab[i] == '*' or formulab[i] == '/'):
-                formulaa[i] = operator(formulaa[i], formulaa[i + 1], formulaa[i],dtpd,hlzh,type)
-                formulab.remove(formulab[i])
-                formulaa.remove(formulaa[i + 1])
+                formulaa[i] = operator(formulaa[i], formulaa[i + 1], formulab[i], dtpd, hlzh, type)
+                del formulab[i]
+                del formulaa[i + 1]
+                formulab.index = formulab.index - 1
+                formulab.index.values[0] = 0
+                j = i
+                for j in range(len(formulaa.index.values) - 1):
+                    formulaa.index.values[j + 1] = j + 1
             i = i + 1
-        while (len(formulaa) > 1):
-            formulaa[0] = operator(formulaa[0], formulaa[1], formulab[0],dtpd,hlzh,type)
-            del formulab[0]
-            del formulaa[1]
+        indexf = 0
+        indexg = 1
+        while len(formulaa) > 1:
+            # if isinstance(formulaa[0], pd.Series):
+            #     temp = formulaa[0].to_frame()
+            #     aa = formulab.tolist()[0]
+            #     if aa == '+':
+            #         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+            #             formulaa[0] = temp + dtpd[formulaa.tolist()[1]]
+            #         else:
+            #             return temp + dtpd.xs(dtpd[formulaa[1]], axis=0)
+            # else:
+            if isinstance(formulaa[0], pd.Series):
+                formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type)
+            else:
+                formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type)
+            del formulab[indexf]
+            indexf += 1
+            del formulaa[indexg]
+            indexg += 1
         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
             dtpd[newField] = formulaa[0].to_frame()
         else:
@@ -192,18 +213,59 @@ def datamethod():
     return {"code": 200, "data": data}
 
 
-def operator(x, y, ope, dtpd, hlzh,type):
-    if (ope == '+'):
+def operator(x, y, ope, dtpd, hlzh, type):
+    if ope == '+':
         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
+                return x + dtpd[y]
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x + y
             return dtpd[x] + dtpd[y]
         else:
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x + dtpd.xs(y, axis=0)
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x + y
             return dtpd.xs(x, axis=0) + dtpd.xs(y, axis=0)
-    elif (ope == '-'):
-        return dtpd[x] - dtpd[y]
-    elif (ope == '*'):
-        return dtpd[x] * dtpd[y]
-    elif (ope == '/'):
-        return dtpd[x] / dtpd[y]
+    elif ope == '-':
+        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x - dtpd[y]
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x - y
+            return dtpd[x] - dtpd[y]
+        else:
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x - dtpd.xs(y, axis=0)
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x - y
+            return dtpd.xs(x, axis=0) - dtpd.xs(y, axis=0)
+    elif ope == '*':
+        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x * dtpd[y]
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x * y
+            return dtpd[x] * dtpd[y]
+        else:
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x * dtpd.xs(y, axis=0)
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x * y
+            return dtpd.xs(x, axis=0) * dtpd.xs(y, axis=0)
+    elif ope == '/':
+        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x / dtpd[y]
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x / y
+            return dtpd[x] / dtpd[y]
+        else:
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x / dtpd.xs(y, axis=0)
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x / y
+            return dtpd.xs(x, axis=0) / dtpd.xs(y, axis=0)
 
 
 @app.route('/login', methods=['POST'])
