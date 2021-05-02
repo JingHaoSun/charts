@@ -62,7 +62,7 @@ def datasql(tablename, hlzh, type):
 
 @app.route('/data', methods=['POST'])
 def datamethod():
-    # data
+    # 请求参数
     datarequest = request.form.to_dict()
     tablename = ''
     count = 5
@@ -90,21 +90,20 @@ def datamethod():
         if key == 'newField':
             newField = datarequest[key]
 
-    # sql
+    # 数据库查询
     data = {}
     if tablename is None:
         return {"code": 404, "data": "error"}
     # hlzh
     xLabelList, dataTable = datasql(tablename, hlzh, type)
 
-    # Data filtering
+    # 数据筛选
     dtpd = pd.DataFrame(dataTable)
     dtpdtemp = dtpd.loc[:, ['c_yAxis', 'e_yAxis']]
     dtpd = dtpd.set_index('e_yAxis')
     dtpdtemp.index = dtpd.index
     dtpd = dtpd.drop(labels='c_yAxis', axis=1, index=None, columns=None, inplace=False)
 
-    # 按行筛选
     if search_list != '':
         items = json.loads(search_list)
         for item in items:
@@ -141,7 +140,7 @@ def datamethod():
     if hlzh == '1':
         dtpd = dtpd.iloc[:int(count)]
 
-    # func
+    # 统计
     if func != '':
         if func == 'sum':
             dtpd.loc['求和'] = dtpd.apply(lambda x: x.sum())
@@ -155,7 +154,7 @@ def datamethod():
         elif func == 'min':
             dtpd.loc['最小值'] = dtpd.min()
             dtpdtemp.loc['最小值'] = ['最小值', 'min']
-
+    #新增变量
     if (formula != '') & (newField != ''):
         formula = formula.split(',')
         formulaa = []
@@ -203,7 +202,7 @@ def datamethod():
     data['dataTable'] = dtpd.to_dict(orient='records')
     return {"code": 200, "data": data}
 
-
+#新增变量
 def operator(x, y, ope, dtpd, hlzh, type):
     if ope == '+':
         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
