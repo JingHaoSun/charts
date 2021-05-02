@@ -182,15 +182,6 @@ def datamethod():
         indexf = 0
         indexg = 1
         while len(formulaa) > 1:
-            # if isinstance(formulaa[0], pd.Series):
-            #     temp = formulaa[0].to_frame()
-            #     aa = formulab.tolist()[0]
-            #     if aa == '+':
-            #         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
-            #             formulaa[0] = temp + dtpd[formulaa.tolist()[1]]
-            #         else:
-            #             return temp + dtpd.xs(dtpd[formulaa[1]], axis=0)
-            # else:
             if isinstance(formulaa[0], pd.Series):
                 formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type)
             else:
@@ -270,8 +261,21 @@ def operator(x, y, ope, dtpd, hlzh, type):
 
 @app.route('/login', methods=['POST'])
 def login():
-    return {"code": 200, "data": {"token": "admin-token"}}
-
+    datarequest = request.form.to_dict()
+    name = ''
+    password = ''
+    for key in datarequest:
+        if key == 'name':
+            name = datarequest[key]
+        if key == 'password':
+            password = datarequest[key]
+    sql = "select count(0) from user_table where name = '" + name + "' and password = '" + password + "'"
+    result = db.session.execute(sql)
+    result = result.cursor.fetchone()[0]
+    if result == 1:
+        return {"code": 200, "data": {"token": "admin-token"}}
+    else:
+        return {"code": 400, "data": {"error": "用户名或者密码不正确"}}
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -283,6 +287,13 @@ def info():
     return {"code": 200, "data": {"roles": ["admin"], "introduction": "I am a super administrator",
                                   "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
                                   "name": "Super Admin"}}
+
+@app.route('/log', methods=['GET'])
+def log():
+    return {"code": 200, "data": {"roles": ["admin"], "introduction": "I am a super administrator",
+                                  "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
+                                  "name": "Super Admin"}}
+
 
 
 if __name__ == '__main__':
