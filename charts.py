@@ -191,6 +191,11 @@ def datamethod():
             indexg += 1
         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
             dtpd[newField] = formulaa[0].to_frame()
+            xLabelListadd = {}
+            xLabelListadd['cname'] = "新增指标"
+            xLabelListadd['ename'] = "新增指标"
+            xLabelListadd['pointer'] = newField
+            xLabelList.append(xLabelListadd)
         else:
             dtpd.loc[newField] = formulaa[0]
             dtpdtemp.loc[newField] = [newField, newField]
