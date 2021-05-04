@@ -72,6 +72,7 @@ def datamethod():
     func = ''
     formula = ''
     newField = ''
+    filter_array = ''
     for key in datarequest:
         if key == 'tablename':
             tablename = datarequest[key]
@@ -89,6 +90,8 @@ def datamethod():
             formula = datarequest[key]
         if key == 'newField':
             newField = datarequest[key]
+        if key == 'filter_array':
+            filter_array = datarequest[key]
 
     # 数据库查询
     data = {}
@@ -199,6 +202,15 @@ def datamethod():
         else:
             dtpd.loc[newField] = formulaa[0]
             dtpdtemp.loc[newField] = [newField, newField]
+
+    # 编辑
+    if (filter_array != ''):
+        filterArray = filter_array.split(',')
+        if type == 'column':
+            dtpd = dtpd[filterArray]
+        else:
+            dtpd = dtpd.loc[filterArray]
+
 
     dtpd = dtpdtemp.join(dtpd)
     dtpd = dtpd.dropna(axis=0, how='any')
