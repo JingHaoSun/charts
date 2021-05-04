@@ -265,14 +265,15 @@ def operator(x, y, ope, dtpd, hlzh, type):
 
 @app.route('/login', methods=['POST'])
 def login():
-    datarequest = request.form.to_dict()
+    datarequest = json.loads(request.data)
     name = ''
     password = ''
     for key in datarequest:
-        if key == 'name':
+        if key == 'username':
             name = datarequest[key]
         if key == 'password':
             password = datarequest[key]
+
     sql = "select count(0) from user_table where name = '" + name + "' and password = '" + password + "'"
     result = db.session.execute(sql)
     result = result.cursor.fetchone()[0]
