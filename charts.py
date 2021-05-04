@@ -264,7 +264,7 @@ def login():
     name = ''
     password = ''
     for key in datarequest:
-        if key == 'name':
+        if key == 'username':
             name = datarequest[key]
         if key == 'password':
             password = datarequest[key]
