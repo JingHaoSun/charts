@@ -193,11 +193,12 @@ def datamethod():
             del formulaa[indexg]
             indexg += 1
         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
-            dtpd[newField] = formulaa[0].to_frame()
+            xlen = len(xLabelList)
+            dtpd['xLabel' + str(xlen)] = formulaa[0].to_frame()
             xLabelListadd = {}
-            xLabelListadd['cname'] = "新增指标"
-            xLabelListadd['ename'] = "新增指标"
-            xLabelListadd['pointer'] = newField
+            xLabelListadd['cname'] = newField
+            xLabelListadd['ename'] = newField
+            xLabelListadd['pointer'] = 'xLabel' + str(xlen)
             xLabelList.append(xLabelListadd)
         else:
             dtpd.loc[newField] = formulaa[0]
