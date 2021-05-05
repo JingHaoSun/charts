@@ -207,7 +207,7 @@ def datamethod():
     # 编辑
     if (filter_array != ''):
         filterArray = filter_array.split(',')
-        if type == 'column':
+        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
             dtpd = dtpd[filterArray]
         else:
             dtpd = dtpd.loc[filterArray]
