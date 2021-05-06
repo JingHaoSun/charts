@@ -211,13 +211,16 @@ def datamethod():
         # 编辑
         if (filter_array != ''):
             filterArray = filter_array.split(',')
-            xLabelListtemp = []
-            dtpd = dtpd[filterArray]
-            for key in xLabelList:
-                for index in range(len(filterArray)):
-                    if key.get('pointer') == filterArray[index]:
-                        xLabelListtemp.append(key)
-            xLabelList = xLabelListtemp
+            if (type == 'row'):
+                xLabelListtemp = []
+                dtpd = dtpd[filterArray]
+                for key in xLabelList:
+                    for index in range(len(filterArray)):
+                        if key.get('pointer') == filterArray[index]:
+                            xLabelListtemp.append(key)
+                xLabelList = xLabelListtemp
+            else:
+                dtpd = dtpd.loc[filterArray]
         dtpd = dtpdtemp.join(dtpd)
         dtpd = dtpd.dropna(axis=0, how='any')
 
