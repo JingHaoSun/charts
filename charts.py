@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import time
 import uuid
+import getpass
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -210,27 +211,37 @@ def datamethod():
         # 编辑
         if (filter_array != ''):
             filterArray = filter_array.split(',')
-            if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
-                xLabelListtemp = []
-                dtpd = dtpd[filterArray]
-                for key in xLabelList:
-                    for index in range(len(filterArray)):
-                        if key.get('pointer') == filterArray[index]:
-                            xLabelListtemp.append(key)
-                xLabelList = xLabelListtemp
-            else:
-                dtpd = dtpd.loc[filterArray]
+            xLabelListtemp = []
+            dtpd = dtpd[filterArray]
+            for key in xLabelList:
+                for index in range(len(filterArray)):
+                    if key.get('pointer') == filterArray[index]:
+                        xLabelListtemp.append(key)
+            xLabelList = xLabelListtemp
         dtpd = dtpdtemp.join(dtpd)
         dtpd = dtpd.dropna(axis=0, how='any')
 
         data['xLabelList'] = xLabelList
         data['dataTable'] = dtpd.to_dict(orient='records')
-
-        return {"code": 200, "data": data}
     except Exception as e:
-        print(e)
         times = round(time.time() * 1000)
-        uuids = str(uuid.uuid1())
+        sql = 'insert into log (log_type, user_id, time) values ("error",1,'+str(times)+')'
+        result = db.session.execute(sql)
+        last_insert_id = result.lastrowid
+        sql1 = 'insert into log_error (err_message, user_id, time) values ("error",1,' + str(times) + ')'
+        db.session.commit()
+        return {"code": 400, "data": "error"}
+    else:
+        times = round(time.time() * 1000)
+        sql = 'insert into log (log_type, user_id, time) values ("success",1,' + str(times) + ')'
+        db.session.execute(sql)
+        db.session.commit()
+        return {"code": 200, "data": data}
+    finally:
+        sql = 'insert into log_info (log_type, user_id, time) values ("success",1,' + str(times) + ')'
+        request.url
+
+
 
 
 
@@ -300,7 +311,6 @@ def login():
             name = datarequest[key]
         if key == 'password':
             password = datarequest[key]
-
     sql = "select count(0) from user_table where name = '" + name + "' and password = '" + password + "'"
     result = db.session.execute(sql)
     result = result.cursor.fetchone()[0]
