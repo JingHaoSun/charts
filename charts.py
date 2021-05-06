@@ -306,7 +306,7 @@ def operator(x, y, ope, dtpd, hlzh, type):
 @app.route('/login', methods=['POST'])
 def login():
     try:
-        datarequest = request.form.to_dict()
+        datarequest = json.loads(request.data)
         name = ''
         password = ''
         for key in datarequest:
