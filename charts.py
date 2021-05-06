@@ -5,6 +5,8 @@ import configs
 from exts import db
 import numpy as np
 import pandas as pd
+import time
+import uuid
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -62,163 +64,175 @@ def datasql(tablename, hlzh, type):
 
 @app.route('/data', methods=['POST'])
 def datamethod():
-    # 请求参数
-    datarequest = request.form.to_dict()
-    tablename = ''
-    count = 5
-    search_list = ''
-    hlzh = 1
-    type = ''
-    func = ''
-    formula = ''
-    newField = ''
-    filter_array = ''
-    for key in datarequest:
-        if key == 'tablename':
-            tablename = datarequest[key]
-        if key == 'count':
-            count = datarequest[key]
-        if key == 'search_list':
-            search_list = datarequest[key]
-        if key == 'hlzh':
-            hlzh = datarequest[key]
-        if key == 'type':
-            type = datarequest[key]
-        if key == 'func':
-            func = datarequest[key]
-        if key == 'formula':
-            formula = datarequest[key]
-        if key == 'newField':
-            newField = datarequest[key]
-        if key == 'filter_array':
-            filter_array = datarequest[key]
+    try:
+        # 请求参数
+        datarequest = request.form.to_dict()
+        tablename = ''
+        count = 5
+        search_list = ''
+        hlzh = 1
+        type = ''
+        func = ''
+        formula = ''
+        newField = ''
+        filter_array = ''
+        for key in datarequest:
+            if key == 'tablename':
+                tablename = datarequest[key]
+            if key == 'count':
+                count = datarequest[key]
+            if key == 'search_list':
+                search_list = datarequest[key]
+            if key == 'hlzh':
+                hlzh = datarequest[key]
+            if key == 'type':
+                type = datarequest[key]
+            if key == 'func':
+                func = datarequest[key]
+            if key == 'formula':
+                formula = datarequest[key]
+            if key == 'newField':
+                newField = datarequest[key]
+            if key == 'filter_array':
+                filter_array = datarequest[key]
 
-    # 数据库查询
-    data = {}
-    if tablename is None:
-        return {"code": 404, "data": "error"}
-    # hlzh
-    xLabelList, dataTable = datasql(tablename, hlzh, type)
+        # 数据库查询
+        data = {}
+        if tablename is None:
+            return {"code": 404, "data": "error"}
+        # hlzh
+        xLabelList, dataTable = datasql(tablename, hlzh, type)
 
-    # 数据筛选
-    dtpd = pd.DataFrame(dataTable)
-    dtpdtemp = dtpd.loc[:, ['c_yAxis', 'e_yAxis']]
-    dtpd = dtpd.set_index('e_yAxis')
-    dtpdtemp.index = dtpd.index
-    dtpd = dtpd.drop(labels='c_yAxis', axis=1, index=None, columns=None, inplace=False)
+        # 数据筛选
+        dtpd = pd.DataFrame(dataTable)
+        dtpdtemp = dtpd.loc[:, ['c_yAxis', 'e_yAxis']]
+        dtpd = dtpd.set_index('e_yAxis')
+        dtpdtemp.index = dtpd.index
+        dtpd = dtpd.drop(labels='c_yAxis', axis=1, index=None, columns=None, inplace=False)
 
-    if search_list != '':
-        items = json.loads(search_list)
-        for item in items:
-            for key in item:
-                if type == 'row':
-                    for elist in xLabelList:
-                        if elist.get('ename') == key:
-                            pointer = elist.get('pointer')
-                            break
-                    for v in item[key]:
-                        if 'gt' in v:
-                            dtpd = dtpd.loc[(dtpd[pointer] > int(v['gt'])), :]
-                        elif 'lt' in v:
-                            dtpd = dtpd.loc[(dtpd[pointer] < int(v['lt'])), :]
-                        elif 'le' in v:
-                            dtpd = dtpd.loc[(dtpd[pointer] <= int(v['le'])), :]
-                        elif 'ge' in v:
-                            dtpd = dtpd.loc[(dtpd[pointer] >= int(v['ge'])), :]
-                elif type == 'column':
-                    for v in item[key]:
-                        if 'gt' in v:
-                            dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) > int(v['gt']))]
-                        elif 'lt' in v:
-                            dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) < int(v['lt']))]
-                        elif 'le' in v:
-                            dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) <= int(v['le']))]
-                        elif 'ge' in v:
-                            dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) >= int(v['ge']))]
+        if search_list != '':
+            items = json.loads(search_list)
+            for item in items:
+                for key in item:
+                    if type == 'row':
+                        for elist in xLabelList:
+                            if elist.get('ename') == key:
+                                pointer = elist.get('pointer')
+                                break
+                        for v in item[key]:
+                            if 'gt' in v:
+                                dtpd = dtpd.loc[(dtpd[pointer] > int(v['gt'])), :]
+                            elif 'lt' in v:
+                                dtpd = dtpd.loc[(dtpd[pointer] < int(v['lt'])), :]
+                            elif 'le' in v:
+                                dtpd = dtpd.loc[(dtpd[pointer] <= int(v['le'])), :]
+                            elif 'ge' in v:
+                                dtpd = dtpd.loc[(dtpd[pointer] >= int(v['ge'])), :]
+                    elif type == 'column':
+                        for v in item[key]:
+                            if 'gt' in v:
+                                dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) > int(v['gt']))]
+                            elif 'lt' in v:
+                                dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) < int(v['lt']))]
+                            elif 'le' in v:
+                                dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) <= int(v['le']))]
+                            elif 'ge' in v:
+                                dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) >= int(v['ge']))]
 
-    # count
-    if hlzh == '0':
-        dtpd = dtpd.iloc[:, 0:int(count)]
-        xLabelList = xLabelList[0:int(count)]
-    if hlzh == '1':
-        dtpd = dtpd.iloc[:int(count)]
+        # count
+        if hlzh == '0':
+            dtpd = dtpd.iloc[:, 0:int(count)]
+            xLabelList = xLabelList[0:int(count)]
+        if hlzh == '1':
+            dtpd = dtpd.iloc[:int(count)]
 
-    # 统计
-    if func != '':
-        if func == 'sum':
-            dtpd.loc['求和'] = dtpd.apply(lambda x: x.sum())
-            dtpdtemp.loc['求和'] = ['求和', 'sum']
-        elif func == 'avg':
-            dtpd.loc['求平均'] = dtpd.apply(lambda x: x.mean())
-            dtpdtemp.loc['求平均'] = ['求平均', 'avg']
-        elif func == 'max':
-            dtpd.loc['最大值'] = dtpd.max()
-            dtpdtemp.loc['最大值'] = ['最大值', 'max']
-        elif func == 'min':
-            dtpd.loc['最小值'] = dtpd.min()
-            dtpdtemp.loc['最小值'] = ['最小值', 'min']
-    #新增变量
-    if (formula != '') & (newField != ''):
-        formula = formula.split(',')
-        formulaa = []
-        formulab = []
-        for index in range(len(formula)):
-            if formula[index] == '+' or formula[index] == '-' or formula[index] == '*' or formula[index] == '/':
-                formulab.append(formula[index])
+        # 统计
+        if func != '':
+            if func == 'sum':
+                dtpd.loc['求和'] = dtpd.apply(lambda x: x.sum())
+                dtpdtemp.loc['求和'] = ['求和', 'sum']
+            elif func == 'avg':
+                dtpd.loc['求平均'] = dtpd.apply(lambda x: x.mean())
+                dtpdtemp.loc['求平均'] = ['求平均', 'avg']
+            elif func == 'max':
+                dtpd.loc['最大值'] = dtpd.max()
+                dtpdtemp.loc['最大值'] = ['最大值', 'max']
+            elif func == 'min':
+                dtpd.loc['最小值'] = dtpd.min()
+                dtpdtemp.loc['最小值'] = ['最小值', 'min']
+        #新增变量
+        if (formula != '') & (newField != ''):
+            formula = formula.split(',')
+            formulaa = []
+            formulab = []
+            for index in range(len(formula)):
+                if formula[index] == '+' or formula[index] == '-' or formula[index] == '*' or formula[index] == '/':
+                    formulab.append(formula[index])
+                else:
+                    formulaa.append(formula[index])
+            i = 0
+            formulaa = pd.Series(formulaa)
+            formulab = pd.Series(formulab)
+            while (i < len(formulab)):
+                if (formulab[i] == '*' or formulab[i] == '/'):
+                    formulaa[i] = operator(formulaa[i], formulaa[i + 1], formulab[i], dtpd, hlzh, type)
+                    del formulab[i]
+                    del formulaa[i + 1]
+                    formulab.index = formulab.index - 1
+                    formulab.index.values[0] = 0
+                    j = i
+                    for j in range(len(formulaa.index.values) - 1):
+                        formulaa.index.values[j + 1] = j + 1
+                i = i + 1
+            indexf = 0
+            indexg = 1
+            while len(formulaa) > 1:
+                if isinstance(formulaa[0], pd.Series):
+                    formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type)
+                else:
+                    formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type)
+                del formulab[indexf]
+                indexf += 1
+                del formulaa[indexg]
+                indexg += 1
+            if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+                xlen = len(xLabelList)
+                dtpd['xLabel' + str(xlen)] = formulaa[0].to_frame()
+                xLabelListadd = {}
+                xLabelListadd['cname'] = newField
+                xLabelListadd['ename'] = newField
+                xLabelListadd['pointer'] = 'xLabel' + str(xlen)
+                xLabelList.append(xLabelListadd)
             else:
-                formulaa.append(formula[index])
-        i = 0
-        formulaa = pd.Series(formulaa)
-        formulab = pd.Series(formulab)
-        while (i < len(formulab)):
-            if (formulab[i] == '*' or formulab[i] == '/'):
-                formulaa[i] = operator(formulaa[i], formulaa[i + 1], formulab[i], dtpd, hlzh, type)
-                del formulab[i]
-                del formulaa[i + 1]
-                formulab.index = formulab.index - 1
-                formulab.index.values[0] = 0
-                j = i
-                for j in range(len(formulaa.index.values) - 1):
-                    formulaa.index.values[j + 1] = j + 1
-            i = i + 1
-        indexf = 0
-        indexg = 1
-        while len(formulaa) > 1:
-            if isinstance(formulaa[0], pd.Series):
-                formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type)
+                dtpd.loc[newField] = formulaa[0]
+                dtpdtemp.loc[newField] = [newField, newField]
+
+        # 编辑
+        if (filter_array != ''):
+            filterArray = filter_array.split(',')
+            if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+                xLabelListtemp = []
+                dtpd = dtpd[filterArray]
+                for key in xLabelList:
+                    for index in range(len(filterArray)):
+                        if key.get('pointer') == filterArray[index]:
+                            xLabelListtemp.append(key)
+                xLabelList = xLabelListtemp
             else:
-                formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type)
-            del formulab[indexf]
-            indexf += 1
-            del formulaa[indexg]
-            indexg += 1
-        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
-            xlen = len(xLabelList)
-            dtpd['xLabel' + str(xlen)] = formulaa[0].to_frame()
-            xLabelListadd = {}
-            xLabelListadd['cname'] = newField
-            xLabelListadd['ename'] = newField
-            xLabelListadd['pointer'] = 'xLabel' + str(xlen)
-            xLabelList.append(xLabelListadd)
-        else:
-            dtpd.loc[newField] = formulaa[0]
-            dtpdtemp.loc[newField] = [newField, newField]
+                dtpd = dtpd.loc[filterArray]
+        dtpd = dtpdtemp.join(dtpd)
+        dtpd = dtpd.dropna(axis=0, how='any')
 
-    # 编辑
-    if (filter_array != ''):
-        filterArray = filter_array.split(',')
-        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
-            dtpd = dtpd[filterArray]
-        else:
-            dtpd = dtpd.loc[filterArray]
+        data['xLabelList'] = xLabelList
+        data['dataTable'] = dtpd.to_dict(orient='records')
+
+        return {"code": 200, "data": data}
+    except Exception as e:
+        print(e)
+        times = round(time.time() * 1000)
+        uuids = str(uuid.uuid1())
 
 
-    dtpd = dtpdtemp.join(dtpd)
-    dtpd = dtpd.dropna(axis=0, how='any')
-
-    data['xLabelList'] = xLabelList
-    data['dataTable'] = dtpd.to_dict(orient='records')
-    return {"code": 200, "data": data}
 
 #新增变量
 def operator(x, y, ope, dtpd, hlzh, type):
