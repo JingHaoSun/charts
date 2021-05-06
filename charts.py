@@ -6,8 +6,7 @@ from exts import db
 import numpy as np
 import pandas as pd
 import time
-import uuid
-import getpass
+import datetime
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -227,26 +226,26 @@ def datamethod():
         data['xLabelList'] = xLabelList
         data['dataTable'] = dtpd.to_dict(orient='records')
     except Exception as e:
-        times = round(time.time() * 1000)
+        times = datetime.datetime.now().timestamp()
         sql = 'insert into log (log_type, user_id, time) values ("error",1,'+str(times)+')'
         result = db.session.execute(sql)
         last_insert_id = result.lastrowid
-        sql1 = 'insert into log_error (err_message, user_id, time) values ("error",1,' + str(times) + ')'
+        times1 = datetime.datetime.now().timestamp()
+        sql1 = 'insert into log_error (err_message, log_id, url, params, time) values ('+str(e)+','+str(last_insert_id)+',"' + request.url + '","'+str(datarequest)+'",'+str(times1)+')'
+        result = db.session.execute(sql1)
         db.session.commit()
         return {"code": 400, "data": "error"}
     else:
-        times = round(time.time() * 1000)
+        times = datetime.datetime.now().timestamp()
         sql = 'insert into log (log_type, user_id, time) values ("success",1,' + str(times) + ')'
-        db.session.execute(sql)
+        result = db.session.execute(sql)
+        last_insert_id = result.lastrowid
+        times1 = datetime.datetime.now().timestamp()
+        sql1 = 'insert into log_info (log_id, url, params, time) values (' + str(
+            last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
+        result = db.session.execute(sql1)
         db.session.commit()
         return {"code": 200, "data": data}
-    finally:
-        sql = 'insert into log_info (log_type, user_id, time) values ("success",1,' + str(times) + ')'
-        request.url
-
-
-
-
 
 #新增变量
 def operator(x, y, ope, dtpd, hlzh, type):
@@ -306,21 +305,42 @@ def operator(x, y, ope, dtpd, hlzh, type):
 
 @app.route('/login', methods=['POST'])
 def login():
-    datarequest = json.loads(request.data)
-    name = ''
-    password = ''
-    for key in datarequest:
-        if key == 'username':
-            name = datarequest[key]
-        if key == 'password':
-            password = datarequest[key]
-    sql = "select count(0) from user_table where name = '" + name + "' and password = '" + password + "'"
-    result = db.session.execute(sql)
-    result = result.cursor.fetchone()[0]
-    if result == 1:
-        return {"code": 200, "data": {"token": "admin-token"}}
-    else:
+    try:
+        datarequest = request.form.to_dict()
+        name = ''
+        password = ''
+        for key in datarequest:
+            if key == 'name':
+                name = datarequest[key]
+            if key == 'password':
+                password = datarequest[key]
+        sql = "select count(0) from user_table where name = '" + name + "' and password = '" + password + "'"
+        result = db.session.execute(sql)
+        result = result.cursor.fetchone()[0]
+        if result != 1:
+            raise Exception("用户名或者密码不正确")
+    except Exception as e:
+        times = datetime.datetime.now().timestamp()
+        sql = 'insert into log (log_type, user_id, time) values ("error",1,' + str(times) + ')'
+        result = db.session.execute(sql)
+        last_insert_id = result.lastrowid
+        times1 = datetime.datetime.now().timestamp()
+        sql1 = 'insert into log_error (err_message, log_id, url, params, time) values ("' + str(e) + '",' + str(
+            last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
+        result = db.session.execute(sql1)
+        db.session.commit()
         return {"code": 400, "data": {"error": "用户名或者密码不正确"}}
+    else:
+        times = datetime.datetime.now().timestamp()
+        sql = 'insert into log (log_type, user_id, time) values ("success",1,' + str(times) + ')'
+        result = db.session.execute(sql)
+        last_insert_id = result.lastrowid
+        times1 = datetime.datetime.now().timestamp()
+        sql1 = 'insert into log_info (log_id, url, params, time) values (' + str(
+            last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
+        result = db.session.execute(sql1)
+        db.session.commit()
+        return {"code": 200, "data": {"token": "admin-token"}}
 
 @app.route('/logout', methods=['POST'])
 def logout():
