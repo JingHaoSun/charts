@@ -5,7 +5,7 @@ import configs
 from exts import db
 import numpy as np
 import pandas as pd
-import time
+import requests
 import datetime
 
 app = Flask(__name__)
@@ -226,25 +226,10 @@ def datamethod():
         data['xLabelList'] = xLabelList
         data['dataTable'] = dtpd.to_dict(orient='records')
     except Exception as e:
-        times = datetime.datetime.now().timestamp()
-        sql = 'insert into log (log_type, user_id, time) values ("error",1,'+str(times)+')'
-        result = db.session.execute(sql)
-        last_insert_id = result.lastrowid
-        times1 = datetime.datetime.now().timestamp()
-        sql1 = 'insert into log_error (err_message, log_id, url, params, time) values ('+str(e)+','+str(last_insert_id)+',"' + request.url + '","'+str(datarequest)+'",'+str(times1)+')'
-        result = db.session.execute(sql1)
-        db.session.commit()
+        logerror(datarequest, e)
         return {"code": 400, "data": "error"}
     else:
-        times = datetime.datetime.now().timestamp()
-        sql = 'insert into log (log_type, user_id, time) values ("success",1,' + str(times) + ')'
-        result = db.session.execute(sql)
-        last_insert_id = result.lastrowid
-        times1 = datetime.datetime.now().timestamp()
-        sql1 = 'insert into log_info (log_id, url, params, time) values (' + str(
-            last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
-        result = db.session.execute(sql1)
-        db.session.commit()
+        logsuccess(datarequest)
         return {"code": 200, "data": data}
 
 #新增变量
@@ -320,46 +305,72 @@ def login():
         if result != 1:
             raise Exception("用户名或者密码不正确")
     except Exception as e:
-        times = datetime.datetime.now().timestamp()
-        sql = 'insert into log (log_type, user_id, time) values ("error",1,' + str(times) + ')'
-        result = db.session.execute(sql)
-        last_insert_id = result.lastrowid
-        times1 = datetime.datetime.now().timestamp()
-        sql1 = 'insert into log_error (err_message, log_id, url, params, time) values ("' + str(e) + '",' + str(
-            last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
-        result = db.session.execute(sql1)
-        db.session.commit()
+        logerror(datarequest, e)
         return {"code": 400, "data": {"error": "用户名或者密码不正确"}}
     else:
-        times = datetime.datetime.now().timestamp()
-        sql = 'insert into log (log_type, user_id, time) values ("success",1,' + str(times) + ')'
-        result = db.session.execute(sql)
-        last_insert_id = result.lastrowid
-        times1 = datetime.datetime.now().timestamp()
-        sql1 = 'insert into log_info (log_id, url, params, time) values (' + str(
-            last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
-        result = db.session.execute(sql1)
-        db.session.commit()
+        logsuccess(datarequest)
         return {"code": 200, "data": {"token": "admin-token"}}
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    return {"code": 200, "data": "success"}
-
+    try:
+        datarequest = json.loads(request.data)
+    except Exception as e:
+        logerror(datarequest, e)
+        return {"code": 400, "data": {"error": "出错了"}}
+    else:
+        logsuccess(datarequest)
+        return {"code": 200, "data": "success"}
 
 @app.route('/info', methods=['GET'])
 def info():
-    return {"code": 200, "data": {"roles": ["admin"], "introduction": "I am a super administrator",
-                                  "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
-                                  "name": "Super Admin"}}
+    try:
+        datarequest = json.loads(request.data)
+    except Exception as e:
+        logerror(datarequest, e)
+        return {"code": 400, "data": {"error": "出错了"}}
+    else:
+        logsuccess(datarequest)
+        return {"code": 200, "data": {"roles": ["admin"], "introduction": "I am a super administrator",
+                                      "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
+                                      "name": "Super Admin"}}
+
 
 @app.route('/log', methods=['GET'])
 def log():
-    return {"code": 200, "data": {"roles": ["admin"], "introduction": "I am a super administrator",
+    try:
+        datarequest = json.loads(request.data)
+    except Exception as e:
+        logerror(datarequest, e)
+        return {"code": 400, "data": {"error": "出错了"}}
+    else:
+        logsuccess(datarequest)
+        return {"code": 200, "data": {"roles": ["admin"], "introduction": "I am a super administrator",
                                   "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
                                   "name": "Super Admin"}}
 
 
+def logerror(datarequest,e):
+    times = datetime.datetime.now().timestamp()
+    sql = 'insert into log (log_type, user_id, time) values ("error",1,' + str(times) + ')'
+    result = db.session.execute(sql)
+    last_insert_id = result.lastrowid
+    times1 = datetime.datetime.now().timestamp()
+    sql1 = 'insert into log_error (err_message, log_id, url, params, time) values ("' + str(e) + '",' + str(
+        last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
+    result = db.session.execute(sql1)
+    db.session.commit()
+
+def logsuccess(datarequest):
+    times = datetime.datetime.now().timestamp()
+    sql = 'insert into log (log_type, user_id, time) values ("success",1,' + str(times) + ')'
+    result = db.session.execute(sql)
+    last_insert_id = result.lastrowid
+    times1 = datetime.datetime.now().timestamp()
+    sql1 = 'insert into log_info (log_id, url, params, time) values (' + str(
+        last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
+    result = db.session.execute(sql1)
+    db.session.commit()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8888)
