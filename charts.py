@@ -1,3 +1,4 @@
+import uuid
 from flask import request, Flask
 from flask_cors import CORS
 import json
@@ -310,6 +311,20 @@ def login():
     else:
         logsuccess(datarequest)
         return {"code": 200, "data": {"token": "admin-token"}}
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    data_request = json.loads(request.data)
+    name, password = data_request['username'], data_request['password']
+    sql = "select count(0) from user_table where name = '" + name + "' and password = '" + password + "'"
+    result = db.session.execute(sql)
+    result = result.cursor.fetchone()[0]
+    if result == 1:
+        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": "admin-uuid"}, "msg": 'success'}
+    else:
+        return {"code": 400, "data": {}, "msg": "用户名或者密码不正确"}
+
 
 @app.route('/logout', methods=['POST'])
 def logout():
