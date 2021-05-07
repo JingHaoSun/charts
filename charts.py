@@ -161,7 +161,7 @@ def datamethod():
             elif func == 'min':
                 dtpd.loc['最小值'] = dtpd.min()
                 dtpdtemp.loc['最小值'] = ['最小值', 'min']
-        #新增变量
+        # 新增变量
         if (formula != '') & (newField != ''):
             formula = formula.split(',')
             formulaa = []
@@ -233,7 +233,8 @@ def datamethod():
         logsuccess(datarequest)
         return {"code": 200, "data": data}
 
-#新增变量
+
+# 新增变量
 def operator(x, y, ope, dtpd, hlzh, type):
     if ope == '+':
         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
@@ -243,74 +244,74 @@ def operator(x, y, ope, dtpd, hlzh, type):
                 return x + y
             return dtpd[x] + dtpd[y]
         else:
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x + dtpd.xs(y, axis=0)
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x + y
             return dtpd.xs(x, axis=0) + dtpd.xs(y, axis=0)
     elif ope == '-':
         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x - dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x - y
             return dtpd[x] - dtpd[y]
         else:
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x - dtpd.xs(y, axis=0)
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x - y
             return dtpd.xs(x, axis=0) - dtpd.xs(y, axis=0)
     elif ope == '*':
         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x * dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x * y
             return dtpd[x] * dtpd[y]
         else:
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x * dtpd.xs(y, axis=0)
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x * y
             return dtpd.xs(x, axis=0) * dtpd.xs(y, axis=0)
     elif ope == '/':
         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x / dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x / y
             return dtpd[x] / dtpd[y]
         else:
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x / dtpd.xs(y, axis=0)
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x / y
             return dtpd.xs(x, axis=0) / dtpd.xs(y, axis=0)
 
 
-@app.route('/login', methods=['POST'])
-def login():
-    try:
-        datarequest = json.loads(request.data)
-        name = ''
-        password = ''
-        for key in datarequest:
-            if key == 'name':
-                name = datarequest[key]
-            if key == 'password':
-                password = datarequest[key]
-        sql = "select count(0) from user_table where name = '" + name + "' and password = '" + password + "'"
-        result = db.session.execute(sql)
-        result = result.cursor.fetchone()[0]
-        if result != 1:
-            raise Exception("用户名或者密码不正确")
-    except Exception as e:
-        logerror(datarequest, e)
-        return {"code": 400, "data": {"error": "用户名或者密码不正确"}}
-    else:
-        logsuccess(datarequest)
-        return {"code": 200, "data": {"token": "admin-token"}}
+# @app.route('/login', methods=['POST'])
+# def login():
+#     try:
+#         datarequest = json.loads(request.data)
+#         name = ''
+#         password = ''
+#         for key in datarequest:
+#             if key == 'name':
+#                 name = datarequest[key]
+#             if key == 'password':
+#                 password = datarequest[key]
+#         sql = "select count(0) from user_table where name = '" + name + "' and password = '" + password + "'"
+#         result = db.session.execute(sql)
+#         result = result.cursor.fetchone()[0]
+#         if result != 1:
+#             raise Exception("用户名或者密码不正确")
+#     except Exception as e:
+#         logerror(datarequest, e)
+#         return {"code": 400, "data": {"error": "用户名或者密码不正确"}}
+#     else:
+#         logsuccess(datarequest)
+#         return {"code": 200, "data": {"token": "admin-token"}}
 
 
 @app.route('/login', methods=['POST'])
@@ -321,7 +322,7 @@ def login():
     result = db.session.execute(sql)
     result = result.cursor.fetchone()[0]
     if result == 1:
-        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": "admin-uuid"}, "msg": 'success'}
+        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": "admin-uuid", "name": name}, "msg": 'success'}
     else:
         return {"code": 400, "data": {}, "msg": "用户名或者密码不正确"}
 
@@ -336,6 +337,7 @@ def logout():
     else:
         logsuccess(datarequest)
         return {"code": 200, "data": "success"}
+
 
 @app.route('/info', methods=['GET'])
 def info():
@@ -361,11 +363,11 @@ def log():
     else:
         logsuccess(datarequest)
         return {"code": 200, "data": {"roles": ["admin"], "introduction": "I am a super administrator",
-                                  "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
-                                  "name": "Super Admin"}}
+                                      "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
+                                      "name": "Super Admin"}}
 
 
-def logerror(datarequest,e):
+def logerror(datarequest, e):
     times = datetime.datetime.now().timestamp()
     sql = 'insert into log (log_type, user_id, time) values ("error",1,' + str(times) + ')'
     result = db.session.execute(sql)
@@ -375,6 +377,7 @@ def logerror(datarequest,e):
         last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
     result = db.session.execute(sql1)
     db.session.commit()
+
 
 def logsuccess(datarequest):
     times = datetime.datetime.now().timestamp()
@@ -386,6 +389,7 @@ def logsuccess(datarequest):
         last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
     result = db.session.execute(sql1)
     db.session.commit()
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8888)
