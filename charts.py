@@ -1,13 +1,13 @@
+import datetime
+import json
 import uuid
+
+import pandas as pd
 from flask import request, Flask
 from flask_cors import CORS
-import json
 import configs
 from exts import db
-import numpy as np
-import pandas as pd
-import requests
-import datetime
+
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -239,92 +239,77 @@ def operator(x, y, ope, dtpd, hlzh, type):
     if ope == '+':
         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
             if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
-                return x + dtpd[y]
+                if ope == '+':
+                    return x + dtpd[y]
+                elif ope == '-':
+                    return x - dtpd[y]
+                elif ope == '*':
+                    return x * dtpd[y]
+                elif ope == '/':
+                    return x / dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
-                return x + y
-            return dtpd[x] + dtpd[y]
+                if ope == '+':
+                    return x + y
+                elif ope == '-':
+                    return x - y
+                elif ope == '*':
+                    return x * y
+                elif ope == '/':
+                    return x / y
+            else:
+                if ope == '+':
+                    return dtpd[x] + dtpd[y]
+                elif ope == '-':
+                    return dtpd[x] - dtpd[y]
+                elif ope == '*':
+                    return dtpd[x] * dtpd[y]
+                elif ope == '/':
+                    return dtpd[x] / dtpd[y]
         else:
             if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
-                return x + dtpd.xs(y, axis=0)
+                if ope == '+':
+                    return x + dtpd.xs(y, axis=0)
+                elif ope == '-':
+                    return x - dtpd.xs(y, axis=0)
+                elif ope == '*':
+                    return x * dtpd.xs(y, axis=0)
+                elif ope == '/':
+                    return x / dtpd.xs(y, axis=0)
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
-                return x + y
-            return dtpd.xs(x, axis=0) + dtpd.xs(y, axis=0)
-    elif ope == '-':
-        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
-            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
-                return x - dtpd[y]
-            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
-                return x - y
-            return dtpd[x] - dtpd[y]
-        else:
-            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
-                return x - dtpd.xs(y, axis=0)
-            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
-                return x - y
-            return dtpd.xs(x, axis=0) - dtpd.xs(y, axis=0)
-    elif ope == '*':
-        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
-            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
-                return x * dtpd[y]
-            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
-                return x * y
-            return dtpd[x] * dtpd[y]
-        else:
-            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
-                return x * dtpd.xs(y, axis=0)
-            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
-                return x * y
-            return dtpd.xs(x, axis=0) * dtpd.xs(y, axis=0)
-    elif ope == '/':
-        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
-            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
-                return x / dtpd[y]
-            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
-                return x / y
-            return dtpd[x] / dtpd[y]
-        else:
-            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
-                return x / dtpd.xs(y, axis=0)
-            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
-                return x / y
-            return dtpd.xs(x, axis=0) / dtpd.xs(y, axis=0)
-
-
-# @app.route('/login', methods=['POST'])
-# def login():
-#     try:
-#         datarequest = json.loads(request.data)
-#         name = ''
-#         password = ''
-#         for key in datarequest:
-#             if key == 'name':
-#                 name = datarequest[key]
-#             if key == 'password':
-#                 password = datarequest[key]
-#         sql = "select count(0) from user_table where name = '" + name + "' and password = '" + password + "'"
-#         result = db.session.execute(sql)
-#         result = result.cursor.fetchone()[0]
-#         if result != 1:
-#             raise Exception("用户名或者密码不正确")
-#     except Exception as e:
-#         logerror(datarequest, e)
-#         return {"code": 400, "data": {"error": "用户名或者密码不正确"}}
-#     else:
-#         logsuccess(datarequest)
-#         return {"code": 200, "data": {"token": "admin-token"}}
-
+                if ope == '+':
+                    return x + y
+                elif ope == '-':
+                    return x - y
+                elif ope == '*':
+                    return x * y
+                elif ope == '/':
+                    return x / y
+            else:
+                if ope == '+':
+                    return dtpd.xs(x, axis=0) + dtpd.xs(y, axis=0)
+                elif ope == '-':
+                    return dtpd.xs(x, axis=0) - dtpd.xs(y, axis=0)
+                elif ope == '*':
+                    return dtpd.xs(x, axis=0) * dtpd.xs(y, axis=0)
+                elif ope == '/':
+                    return dtpd.xs(x, axis=0) / dtpd.xs(y, axis=0)
 
 @app.route('/login', methods=['POST'])
 def login():
-    data_request = json.loads(request.data)
-    name, password = data_request['username'], data_request['password']
-    sql = "select count(0) from user_table where name = '" + name + "' and password = '" + password + "'"
-    result = db.session.execute(sql)
-    result = result.cursor.fetchone()[0]
-    if result == 1:
-        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": "admin-uuid", "name": name}, "msg": 'success'}
-    else:
+    try:
+        data_request = json.loads(request.data)
+        name, password = data_request['username'], data_request['password']
+        sql = "select count(0) from user_table where name = '" + name + "' and password = '" + password + "'"
+        result = db.session.execute(sql)
+        result = result.cursor.fetchone()[0]
+        if result != 1:
+            raise Exception("用户名或者密码不正确")
+    except Exception as e:
+        logerror(data_request, e)
         return {"code": 400, "data": {}, "msg": "用户名或者密码不正确"}
+    else:
+        logsuccess(data_request)
+        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": "admin-uuid", "name": name}, "msg": 'success'}
 
 
 @app.route('/logout', methods=['POST'])
@@ -373,7 +358,7 @@ def logerror(datarequest, e):
     result = db.session.execute(sql)
     last_insert_id = result.lastrowid
     times1 = datetime.datetime.now().timestamp()
-    sql1 = 'insert into log_error (err_message, log_id, url, params, time) values ("' + str(e) + '",' + str(
+    sql1 = 'insert into log_error (err_message, log_id, url, params, time) values (' + str(e) + ',' + str(
         last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
     result = db.session.execute(sql1)
     db.session.commit()
@@ -390,6 +375,3 @@ def logsuccess(datarequest):
     result = db.session.execute(sql1)
     db.session.commit()
 
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8888)
