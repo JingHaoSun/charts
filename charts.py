@@ -18,7 +18,7 @@ app.config.from_object(configs)
 # db绑定app
 db.init_app(app)
 app.config['JSON_AS_ASCII'] = False
-socketio = SocketIO(app)
+socketio = SocketIO(app,cors_allowed_origins = '*')
 
 def datasql(tablename, hlzh, type):
     sql = 'select * from ' + tablename
