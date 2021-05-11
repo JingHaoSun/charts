@@ -1,22 +1,24 @@
 import datetime
 import json
+import time
 import uuid
 
 import pandas as pd
 from flask import request, Flask
 from flask_cors import CORS
+from flask_socketio import SocketIO
 import configs
 from exts import db
 
-
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
 CORS(app, supports_credentials=True)
 # 加载配置文件
 app.config.from_object(configs)
 # db绑定app
 db.init_app(app)
 app.config['JSON_AS_ASCII'] = False
-
+socketio = SocketIO(app)
 
 def datasql(tablename, hlzh, type):
     sql = 'select * from ' + tablename
@@ -61,7 +63,6 @@ def datasql(tablename, hlzh, type):
                 b['xLabel' + str(i)] = re[i + 2]
             dataTable.append(b)
     return xLabelList, dataTable
-
 
 @app.route('/data', methods=['POST'])
 def datamethod():
@@ -233,7 +234,6 @@ def datamethod():
         logsuccess(datarequest)
         return {"code": 200, "data": data}
 
-
 # 新增变量
 def operator(x, y, ope, dtpd, hlzh, type):
     if ope == '+':
@@ -311,7 +311,6 @@ def login():
         logsuccess(data_request)
         return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": "admin-uuid", "name": name}, "msg": 'success'}
 
-
 @app.route('/logout', methods=['POST'])
 def logout():
     try:
@@ -322,7 +321,6 @@ def logout():
     else:
         logsuccess(datarequest)
         return {"code": 200, "data": "success"}
-
 
 @app.route('/info', methods=['GET'])
 def info():
@@ -337,7 +335,6 @@ def info():
                                       "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
                                       "name": "Super Admin"}}
 
-
 @app.route('/log', methods=['GET'])
 def log():
     try:
@@ -351,7 +348,6 @@ def log():
                                       "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
                                       "name": "Super Admin"}}
 
-
 def logerror(datarequest, e):
     times = datetime.datetime.now().timestamp()
     sql = 'insert into log (log_type, user_id, time) values ("error",1,' + str(times) + ')'
@@ -362,7 +358,6 @@ def logerror(datarequest, e):
         last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
     result = db.session.execute(sql1)
     db.session.commit()
-
 
 def logsuccess(datarequest):
     times = datetime.datetime.now().timestamp()
@@ -375,3 +370,17 @@ def logsuccess(datarequest):
     result = db.session.execute(sql1)
     db.session.commit()
 
+@socketio.on('connect')
+def execute_script():
+    print('connect')
+    socketio.emit('res_event', {'data': 'Connected'})
+    socketio.sleep(5)
+
+@socketio.on('message')
+def getMessage(data):
+    print(data)
+    socketio.emit('res_event', data)
+
+@socketio.on('disconnect')
+def close_func():
+    print("close")
