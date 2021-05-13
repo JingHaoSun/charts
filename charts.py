@@ -129,6 +129,8 @@ def datamethod():
                                 dtpd = dtpd.loc[(dtpd[pointer] <= int(v['le'])), :]
                             elif 'ge' in v:
                                 dtpd = dtpd.loc[(dtpd[pointer] >= int(v['ge'])), :]
+                            elif 'qy' in v:
+                                dtpd = dtpd.loc[(dtpd[pointer] % int(v['ge'])), :]
                     elif type == 'column':
                         for v in item[key]:
                             if 'gt' in v:
@@ -139,6 +141,8 @@ def datamethod():
                                 dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) <= int(v['le']))]
                             elif 'ge' in v:
                                 dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) >= int(v['ge']))]
+                            elif 'qy' in v:
+                                dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) % int(v['ge']))]
 
         # count
         if hlzh == '0':
