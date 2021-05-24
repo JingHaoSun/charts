@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 import uuid
 
 import pandas as pd
@@ -16,6 +17,21 @@ app.config.from_object(configs)
 # db绑定app
 db.init_app(app)
 app.config['JSON_AS_ASCII'] = False
+
+
+
+@app.route('/reptiles', methods=['GET'])
+def reptiles():
+    lst = os.listdir(os.getcwd() + "/expenditure")
+    for c in lst:
+        if c.endswith('.py'):
+            dir = os.getcwd() + "\\expenditure"
+            str = "python " + dir + "\\" + c
+            # str = dir + "\\" + c
+            print(str)
+            # execfile(str)
+            os.system(str)  # 批量执行当前目录下所有的.py文件
+    return 'success'
 
 
 def datasql(tablename, hlzh, type):
@@ -183,8 +199,9 @@ def datamethod():
                     formulaa[i] = operator(formulaa[i], formulaa[i + 1], formulab[i], dtpd, hlzh, type)
                     del formulab[i]
                     del formulaa[i + 1]
-                    formulab.index = formulab.index - 1
-                    formulab.index.values[0] = 0
+                    if len(formulab.index.values) != 0:
+                        formulab.index = formulab.index - 1
+                        formulab.index.values[0] = 0
                     j = i
                     for j in range(len(formulaa.index.values) - 1):
                         formulaa.index.values[j + 1] = j + 1
@@ -231,10 +248,9 @@ def datamethod():
         data['xLabelList'] = xLabelList
         data['dataTable'] = dtpd.to_dict(orient='records')
     except Exception as e:
-        logerror(datarequest, e)
-        return {"code": 400, "data": "error"}
+        # logerror(datarequest, e)
+        return {"code": 400, "data": e}
     else:
-        logsuccess(datarequest)
         return {"code": 200, "data": data}
 
 
@@ -243,60 +259,55 @@ def operator(x, y, ope, dtpd, hlzh, type):
     if ope == '+':
         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
             if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
-                if ope == '+':
-                    return x + dtpd[y]
-                elif ope == '-':
-                    return x - dtpd[y]
-                elif ope == '*':
-                    return x * dtpd[y]
-                elif ope == '/':
-                    return x / dtpd[y]
+                return x + dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
-                if ope == '+':
-                    return x + y
-                elif ope == '-':
-                    return x - y
-                elif ope == '*':
-                    return x * y
-                elif ope == '/':
-                    return x / y
-            else:
-                if ope == '+':
-                    return dtpd[x] + dtpd[y]
-                elif ope == '-':
-                    return dtpd[x] - dtpd[y]
-                elif ope == '*':
-                    return dtpd[x] * dtpd[y]
-                elif ope == '/':
-                    return dtpd[x] / dtpd[y]
+                return x + y
+            return dtpd[x] + dtpd[y]
         else:
-            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
-                if ope == '+':
-                    return x + dtpd.xs(y, axis=0)
-                elif ope == '-':
-                    return x - dtpd.xs(y, axis=0)
-                elif ope == '*':
-                    return x * dtpd.xs(y, axis=0)
-                elif ope == '/':
-                    return x / dtpd.xs(y, axis=0)
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x + dtpd.xs(y, axis=0)
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
-                if ope == '+':
-                    return x + y
-                elif ope == '-':
-                    return x - y
-                elif ope == '*':
-                    return x * y
-                elif ope == '/':
-                    return x / y
-            else:
-                if ope == '+':
-                    return dtpd.xs(x, axis=0) + dtpd.xs(y, axis=0)
-                elif ope == '-':
-                    return dtpd.xs(x, axis=0) - dtpd.xs(y, axis=0)
-                elif ope == '*':
-                    return dtpd.xs(x, axis=0) * dtpd.xs(y, axis=0)
-                elif ope == '/':
-                    return dtpd.xs(x, axis=0) / dtpd.xs(y, axis=0)
+                return x + y
+            return dtpd.xs(x, axis=0) + dtpd.xs(y, axis=0)
+    elif ope == '-':
+        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x - dtpd[y]
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x - y
+            return dtpd[x] - dtpd[y]
+        else:
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x - dtpd.xs(y, axis=0)
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x - y
+            return dtpd.xs(x, axis=0) - dtpd.xs(y, axis=0)
+    elif ope == '*':
+        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x * dtpd[y]
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x * y
+            return dtpd[x] * dtpd[y]
+        else:
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x * dtpd.xs(y, axis=0)
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x * y
+            return dtpd.xs(x, axis=0) * dtpd.xs(y, axis=0)
+    elif ope == '/':
+        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x / dtpd[y]
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x / y
+            return dtpd[x] / dtpd[y]
+        else:
+            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+                return x / dtpd.xs(y, axis=0)
+            elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
+                return x / y
+            return dtpd.xs(x, axis=0) / dtpd.xs(y, axis=0)
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -312,7 +323,6 @@ def login():
         logerror(data_request, e)
         return {"code": 400, "data": {}, "msg": "用户名或者密码不正确"}
     else:
-        logsuccess(data_request)
         return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": "admin-uuid", "name": name}, "msg": 'success'}
 
 
@@ -324,7 +334,6 @@ def logout():
         logerror(datarequest, e)
         return {"code": 400, "data": {"error": "出错了"}}
     else:
-        logsuccess(datarequest)
         return {"code": 200, "data": "success"}
 
 
@@ -336,7 +345,6 @@ def info():
         logerror(datarequest, e)
         return {"code": 400, "data": {"error": "出错了"}}
     else:
-        logsuccess(datarequest)
         return {"code": 200, "data": {"roles": ["admin"], "introduction": "I am a super administrator",
                                       "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
                                       "name": "Super Admin"}}
@@ -350,7 +358,6 @@ def log():
         logerror(datarequest, e)
         return {"code": 400, "data": {"error": "出错了"}}
     else:
-        logsuccess(datarequest)
         return {"code": 200, "data": {"roles": ["admin"], "introduction": "I am a super administrator",
                                       "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
                                       "name": "Super Admin"}}
@@ -365,17 +372,7 @@ def logerror(datarequest, e):
     sql1 = 'insert into log_error (err_message, log_id, url, params, time) values (' + str(e) + ',' + str(
         last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
     result = db.session.execute(sql1)
-    db.session.commit()
+    db.session.close()
 
-
-def logsuccess(datarequest):
-    times = datetime.datetime.now().timestamp()
-    sql = 'insert into log (log_type, user_id, time) values ("success",1,' + str(times) + ')'
-    result = db.session.execute(sql)
-    last_insert_id = result.lastrowid
-    times1 = datetime.datetime.now().timestamp()
-    sql1 = 'insert into log_info (log_id, url, params, time) values (' + str(
-        last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
-    result = db.session.execute(sql1)
-    db.session.commit()
-
+# if __name__ == '__main__':
+#     app.run(debug=True, host='0.0.0.0', port=8888)
