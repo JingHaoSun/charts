@@ -196,7 +196,7 @@ def datamethod():
             formulab = pd.Series(formulab)
             while (i < len(formulab)):
                 if (formulab[i] == '*' or formulab[i] == '/'):
-                    formulaa[i] = operator(formulaa[i], formulaa[i + 1], formulab[i], dtpd, hlzh, type)
+                    formulaa[i] = operator(formulaa[i], formulaa[i + 1], formulab[i], dtpd, hlzh, type,xLabelList)
                     del formulab[i]
                     del formulaa[i + 1]
                     if len(formulab.index.values) != 0:
@@ -210,9 +210,9 @@ def datamethod():
             indexg = 1
             while len(formulaa) > 1:
                 if isinstance(formulaa[0], pd.Series):
-                    formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type)
+                    formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type,xLabelList)
                 else:
-                    formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type)
+                    formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type,xLabelList)
                 del formulab[indexf]
                 indexf += 1
                 del formulaa[indexg]
@@ -248,14 +248,19 @@ def datamethod():
         data['xLabelList'] = xLabelList
         data['dataTable'] = dtpd.to_dict(orient='records')
     except Exception as e:
-        # logerror(datarequest, e)
         return {"code": 400, "data": e}
     else:
         return {"code": 200, "data": data}
 
 
 # 新增变量
-def operator(x, y, ope, dtpd, hlzh, type):
+def operator(x, y, ope, dtpd, hlzh, type,xLabelList):
+    if type == 'column':
+        for a in xLabelList:
+            if x == a['cname']:
+                x = a['pointer']
+            if y == a['cname']:
+                y = a['pointer']
     if ope == '+':
         if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
             if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
