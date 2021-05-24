@@ -217,7 +217,7 @@ def datamethod():
                 indexf += 1
                 del formulaa[indexg]
                 indexg += 1
-            if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+            if type == 'column':
                 xlen = len(xLabelList)
                 dtpd['xLabel' + str(xlen)] = formulaa[0].to_frame()
                 xLabelListadd = {}
@@ -257,12 +257,12 @@ def datamethod():
 def operator(x, y, ope, dtpd, hlzh, type,xLabelList):
     if type == 'column':
         for a in xLabelList:
-            if x == a['cname']:
+            if x == a['ename']:
                 x = a['pointer']
-            if y == a['cname']:
+            if y == a['ename']:
                 y = a['pointer']
     if ope == '+':
-        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+        if type == 'column':
             if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x + dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
@@ -275,7 +275,7 @@ def operator(x, y, ope, dtpd, hlzh, type,xLabelList):
                 return x + y
             return dtpd.xs(x, axis=0) + dtpd.xs(y, axis=0)
     elif ope == '-':
-        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+        if type == 'column':
             if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
                 return x - dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
@@ -288,7 +288,7 @@ def operator(x, y, ope, dtpd, hlzh, type,xLabelList):
                 return x - y
             return dtpd.xs(x, axis=0) - dtpd.xs(y, axis=0)
     elif ope == '*':
-        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+        if type == 'column':
             if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
                 return x * dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
@@ -301,7 +301,7 @@ def operator(x, y, ope, dtpd, hlzh, type,xLabelList):
                 return x * y
             return dtpd.xs(x, axis=0) * dtpd.xs(y, axis=0)
     elif ope == '/':
-        if (hlzh == '0') & (type == 'column') | (hlzh == '1') & (type == 'row'):
+        if type == 'column':
             if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
                 return x / dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
