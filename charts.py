@@ -339,6 +339,26 @@ def login():
     else:
         return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": "admin-uuid", "name": name}, "msg": 'success'}
 
+@app.route('/register', methods=['POST'])
+def register():
+    try:
+        data_request = json.loads(request.data)
+        name, password = data_request['username'], data_request['password']
+        sql = "select count(0) from user_table where name = '" + name + "'"
+        result = db.session.execute(sql)
+        result = result.cursor.fetchone()[0]
+        if result == 1:
+            raise Exception("用户名已存在")
+        else:
+            sql = 'insert into user_table (name, password) values (name,password )'
+    except Exception as e:
+        logerror(data_request, e)
+        return {"code": 400, "data": {}, "msg": "注册失败"}
+    else:
+        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": "admin-uuid", "name": name}, "msg": 'success'}
+    finally:
+        db.dispose()
+
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -388,5 +408,5 @@ def logerror(datarequest, e):
     result = db.session.execute(sql1)
     db.dispose()
 
-# if __name__ == '__main__':
-#     app.run(debug=True, host='0.0.0.0', port=8888)
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=8888)
