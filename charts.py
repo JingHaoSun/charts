@@ -159,6 +159,21 @@ def datamethod():
                                 dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) >= int(v['ge']))]
                             elif 'qy' in v:
                                 dtpd = dtpd.loc[:, (dtpd.xs(key, axis=0) % int(v['ge']))]
+                        p_col = dtpd.columns.tolist()
+                        p_newlist = []
+                        p_newcolumn = []
+                        # p_newcolumn.append('c_yAxis')
+                        # p_newcolumn.append('e_yAxis')
+                        index = 0
+                        for p_xlist in xLabelList:
+                            for p in p_col:
+                                if p_xlist['pointer'] == p:
+                                    p_xlist['pointer'] = 'xLabel' + str(index)
+                                    p_newcolumn.append(p_xlist['pointer'])
+                                    index += 1
+                                    p_newlist.append(p_xlist)
+                        xLabelList = p_newlist
+                        dtpd.columns = p_newcolumn
 
         # count
         if hlzh == '0':
