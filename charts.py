@@ -266,6 +266,8 @@ def datamethod():
         return {"code": 400, "data": e}
     else:
         return {"code": 200, "data": data}
+    finally:
+        db.dispose()
 
 
 # 新增变量
@@ -338,6 +340,8 @@ def login():
         return {"code": 400, "data": {}, "msg": "用户名或者密码不正确"}
     else:
         return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": "admin-uuid", "name": name}, "msg": 'success'}
+    finally:
+        db.dispose()
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -369,6 +373,8 @@ def logout():
         return {"code": 400, "data": {"error": "出错了"}}
     else:
         return {"code": 200, "data": "success"}
+    finally:
+        db.dispose()
 
 
 @app.route('/info', methods=['GET'])
@@ -382,6 +388,8 @@ def info():
         return {"code": 200, "data": {"roles": ["admin"], "introduction": "I am a super administrator",
                                       "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
                                       "name": "Super Admin"}}
+    finally:
+        db.dispose()
 
 
 @app.route('/log', methods=['GET'])
@@ -395,6 +403,8 @@ def log():
         return {"code": 200, "data": {"roles": ["admin"], "introduction": "I am a super administrator",
                                       "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
                                       "name": "Super Admin"}}
+    finally:
+        db.dispose()
 
 
 def logerror(datarequest, e):
@@ -408,5 +418,5 @@ def logerror(datarequest, e):
     result = db.session.execute(sql1)
     db.dispose()
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8888)
+# if __name__ == '__main__':
+#     app.run(debug=True, host='0.0.0.0', port=8888)
