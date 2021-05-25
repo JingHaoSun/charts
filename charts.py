@@ -217,7 +217,7 @@ def datamethod():
                 indexf += 1
                 del formulaa[indexg]
                 indexg += 1
-            if type == 'column':
+            if type == 'row':
                 xlen = len(xLabelList)
                 dtpd['xLabel' + str(xlen)] = formulaa[0].to_frame()
                 xLabelListadd = {}
@@ -255,14 +255,8 @@ def datamethod():
 
 # 新增变量
 def operator(x, y, ope, dtpd, hlzh, type,xLabelList):
-    if type == 'column':
-        for a in xLabelList:
-            if x == a['ename']:
-                x = a['pointer']
-            if y == a['ename']:
-                y = a['pointer']
     if ope == '+':
-        if type == 'column':
+        if type == 'row':
             if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x + dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
@@ -275,7 +269,7 @@ def operator(x, y, ope, dtpd, hlzh, type,xLabelList):
                 return x + y
             return dtpd.xs(x, axis=0) + dtpd.xs(y, axis=0)
     elif ope == '-':
-        if type == 'column':
+        if type == 'row':
             if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
                 return x - dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
@@ -288,7 +282,7 @@ def operator(x, y, ope, dtpd, hlzh, type,xLabelList):
                 return x - y
             return dtpd.xs(x, axis=0) - dtpd.xs(y, axis=0)
     elif ope == '*':
-        if type == 'column':
+        if type == 'row':
             if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
                 return x * dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
@@ -301,7 +295,7 @@ def operator(x, y, ope, dtpd, hlzh, type,xLabelList):
                 return x * y
             return dtpd.xs(x, axis=0) * dtpd.xs(y, axis=0)
     elif ope == '/':
-        if type == 'column':
+        if type == 'row':
             if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
                 return x / dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
