@@ -386,7 +386,7 @@ def logerror(datarequest, e):
     sql1 = 'insert into log_error (err_message, log_id, url, params, time) values (' + str(e) + ',' + str(
         last_insert_id) + ',"' + request.url + '","' + str(datarequest) + '",' + str(times1) + ')'
     result = db.session.execute(sql1)
-    db.session.close()
+    db.dispose()
 
 # if __name__ == '__main__':
 #     app.run(debug=True, host='0.0.0.0', port=8888)
