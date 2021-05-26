@@ -343,17 +343,16 @@ def login():
 
 @app.route('/register', methods=['POST'])
 def register():
+    data_request = request.form.to_dict()
+    name, password = data_request['username'], data_request['password']
     try:
-        # data_request = json.loads(request.data)
-        data_request = request.form.to_dict()
-        name, password = data_request['username'], data_request['password']
         sql = "select count(0) from user_table where name = '" + name + "'"
         result = db.session.execute(sql)
         result = result.cursor.fetchone()[0]
         if result == 1:
             raise Exception("用户名已存在")
         else:
-            sql = 'insert into user_table (name, password) values (name,password )'
+            sql = "insert into user_table (name, password) values ({} ,{})".format(name,password)
             db.session.execute(sql)
     except Exception as e:
         logerror(data_request, e)
