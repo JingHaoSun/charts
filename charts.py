@@ -349,14 +349,12 @@ def register():
         sql = "select count(0) from user_table where name = '{}'".format(name)
         result = db.session.execute(sql)
         result = result.cursor.fetchone()[0]
-        print(result)
         if result == 1:
             raise Exception("用户名已存在")
         else:
             sql_insert = "insert into user_table (name, password) values ('{0}','{1}')".format(name, password)
-            print(sql_insert)
-            result2 = db.session.execute(sql_insert)
-            print(result2)
+            db.session.execute(sql_insert)
+            db.session.commit()
             return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": name + "-uuid", "name": name},"msg": 'success'}
     except Exception as e:
         logerror(data_request, e)
