@@ -9,7 +9,6 @@ from flask_cors import CORS
 import configs
 from exts import db
 
-
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 # 加载配置文件
@@ -17,7 +16,6 @@ app.config.from_object(configs)
 # db绑定app
 db.init_app(app)
 app.config['JSON_AS_ASCII'] = False
-
 
 
 @app.route('/reptiles', methods=['GET'])
@@ -211,7 +209,7 @@ def datamethod():
             formulab = pd.Series(formulab)
             while (i < len(formulab)):
                 if (formulab[i] == '*' or formulab[i] == '/'):
-                    formulaa[i] = operator(formulaa[i], formulaa[i + 1], formulab[i], dtpd, hlzh, type,xLabelList)
+                    formulaa[i] = operator(formulaa[i], formulaa[i + 1], formulab[i], dtpd, hlzh, type, xLabelList)
                     del formulab[i]
                     del formulaa[i + 1]
                     if len(formulab.index.values) != 0:
@@ -225,9 +223,11 @@ def datamethod():
             indexg = 1
             while len(formulaa) > 1:
                 if isinstance(formulaa[0], pd.Series):
-                    formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type,xLabelList)
+                    formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type,
+                                           xLabelList)
                 else:
-                    formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type,xLabelList)
+                    formulaa[0] = operator(formulaa[0], formulaa[indexg], formulab[indexf], dtpd, hlzh, type,
+                                           xLabelList)
                 del formulab[indexf]
                 indexf += 1
                 del formulaa[indexg]
@@ -268,9 +268,8 @@ def datamethod():
         return {"code": 200, "data": data}
 
 
-
 # 新增变量
-def operator(x, y, ope, dtpd, hlzh, type,xLabelList):
+def operator(x, y, ope, dtpd, hlzh, type, xLabelList):
     if ope == '+':
         if type == 'row':
             if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
@@ -279,50 +278,51 @@ def operator(x, y, ope, dtpd, hlzh, type,xLabelList):
                 return x + y
             return dtpd[x] + dtpd[y]
         else:
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x + dtpd.xs(y, axis=0)
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x + y
             return dtpd.xs(x, axis=0) + dtpd.xs(y, axis=0)
     elif ope == '-':
         if type == 'row':
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x - dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x - y
             return dtpd[x] - dtpd[y]
         else:
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x - dtpd.xs(y, axis=0)
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x - y
             return dtpd.xs(x, axis=0) - dtpd.xs(y, axis=0)
     elif ope == '*':
         if type == 'row':
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x * dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x * y
             return dtpd[x] * dtpd[y]
         else:
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x * dtpd.xs(y, axis=0)
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x * y
             return dtpd.xs(x, axis=0) * dtpd.xs(y, axis=0)
     elif ope == '/':
         if type == 'row':
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x / dtpd[y]
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x / y
             return dtpd[x] / dtpd[y]
         else:
-            if isinstance(x, pd.Series)& (isinstance(y, pd.Series) == False):
+            if isinstance(x, pd.Series) & (isinstance(y, pd.Series) == False):
                 return x / dtpd.xs(y, axis=0)
             elif isinstance(x, pd.Series) & isinstance(y, pd.Series):
                 return x / y
             return dtpd.xs(x, axis=0) / dtpd.xs(y, axis=0)
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -338,7 +338,7 @@ def login():
         logerror(data_request, e)
         return {"code": 400, "data": {}, "msg": "用户名或者密码不正确"}
     else:
-        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": name+"-uuid", "name": name}, "msg": 'success'}
+        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": name + "-uuid", "name": name}, "msg": 'success'}
 
 
 @app.route('/register', methods=['POST'])
@@ -346,20 +346,21 @@ def register():
     data_request = request.form.to_dict()
     name, password = data_request['username'], data_request['password']
     try:
-        sql = "select count(0) from user_table where name = '" + name + "'"
+        sql = "select count(0) from user_table where name = '{}'".format(name)
         result = db.session.execute(sql)
         result = result.cursor.fetchone()[0]
+        print(result)
         if result == 1:
             raise Exception("用户名已存在")
         else:
-            sql = "insert into user_table (name, password) values ({} ,{})".format(name,password)
-            db.session.execute(sql)
+            sql_insert = "insert into user_table (name, password) values ('{0}','{1}')".format(name, password)
+            print(sql_insert)
+            result2 = db.session.execute(sql_insert)
+            print(result2)
+            return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": name + "-uuid", "name": name},"msg": 'success'}
     except Exception as e:
         logerror(data_request, e)
         return {"code": 400, "data": {}, "msg": "注册失败"}
-    else:
-        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": name+"-uuid", "name": name}, "msg": 'success'}
-
 
 
 @app.route('/logout', methods=['POST'])
@@ -371,7 +372,6 @@ def logout():
         return {"code": 400, "data": {"error": "出错了"}}
     else:
         return {"code": 200, "data": "success"}
-
 
 
 @app.route('/info', methods=['GET'])
@@ -387,7 +387,6 @@ def info():
                                       "name": "Super Admin"}}
 
 
-
 @app.route('/log', methods=['GET'])
 def log():
     try:
@@ -399,7 +398,6 @@ def log():
         return {"code": 200, "data": {"roles": ["admin"], "introduction": "I am a super administrator",
                                       "avatar": "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
                                       "name": "Super Admin"}}
-
 
 
 def logerror(datarequest, e):
