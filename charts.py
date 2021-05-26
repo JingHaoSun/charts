@@ -338,13 +338,14 @@ def login():
         logerror(data_request, e)
         return {"code": 400, "data": {}, "msg": "用户名或者密码不正确"}
     else:
-        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": "admin-uuid", "name": name}, "msg": 'success'}
+        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": name+"-uuid", "name": name}, "msg": 'success'}
 
 
 @app.route('/register', methods=['POST'])
 def register():
     try:
-        data_request = json.loads(request.data)
+        # data_request = json.loads(request.data)
+        data_request = request.form.to_dict()
         name, password = data_request['username'], data_request['password']
         sql = "select count(0) from user_table where name = '" + name + "'"
         result = db.session.execute(sql)
@@ -357,7 +358,7 @@ def register():
         logerror(data_request, e)
         return {"code": 400, "data": {}, "msg": "注册失败"}
     else:
-        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": "admin-uuid", "name": name}, "msg": 'success'}
+        return {"code": 200, "data": {"token": uuid.uuid1(), "uuid": name+"-uuid", "name": name}, "msg": 'success'}
 
 
 
