@@ -354,6 +354,7 @@ def register():
             raise Exception("用户名已存在")
         else:
             sql = 'insert into user_table (name, password) values (name,password )'
+            db.session.execute(sql)
     except Exception as e:
         logerror(data_request, e)
         return {"code": 400, "data": {}, "msg": "注册失败"}
